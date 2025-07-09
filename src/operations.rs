@@ -33,8 +33,6 @@ pub async fn reagents_get() -> Json<Vec<TsmPricingDataResponse>> {
 
     let access_token = resp_tsm_auth_body.access_token;
 
-    println!("{}", access_token);
-
     let resp_tsm_region_pricing_data: Vec<TsmPricingDataResponse> = http_client
         .get("https://pricing-api.tradeskillmaster.com/region/1")
         .bearer_auth(&access_token)
@@ -47,7 +45,6 @@ pub async fn reagents_get() -> Json<Vec<TsmPricingDataResponse>> {
 
 
     Json(resp_tsm_region_pricing_data)
-    
 }
 
 #[derive(serde::Deserialize, Debug)]
