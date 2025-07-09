@@ -9,7 +9,6 @@ use crate::variables::use_variable_TSM_API_KEY;
 
 
 
-#[axum::debug_handler]
 pub async fn reagents_get() -> Json<Vec<TsmPricingDataResponse>> {
     let http_client = reqwest::Client::new();
 
