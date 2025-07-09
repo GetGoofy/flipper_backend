@@ -1,28 +1,14 @@
-use std::collections::HashMap;
-
-use axum::{http, Json};
-use reqwest;
+use axum::{Json};
 use serde;
 
-use crate::variables::use_variable_TSM_API_KEY;
+use crate::variables::{ HTTP_CLIENT, TSM_AUTH_BODY};
 
-
-
-
+#[axum::debug_handler]
 pub async fn reagents_get() -> Json<Vec<TsmPricingDataResponse>> {
-    let http_client = reqwest::Client::new();
 
-
-    let tsm_auth_body = TsmAuthBody {
-        client_id: "c260f00d-1071-409a-992f-dda2e5498536".to_string(),
-        grant_type: "api_token".to_string(),
-        scope: "app:realm-api app:pricing-api".to_string(),
-        token: use_variable_TSM_API_KEY(),
-    };
-
-    let resp_tsm_auth_body: TsmAuthResponse = http_client
+    let resp_tsm_auth_body: TsmAuthResponse = HTTP_CLIENT
         .post("https://auth.tradeskillmaster.com/oauth2/token")
-        .json(&tsm_auth_body)
+        .json(&*TSM_AUTH_BODY)
         .send()
         .await
         .unwrap()
@@ -30,11 +16,9 @@ pub async fn reagents_get() -> Json<Vec<TsmPricingDataResponse>> {
         .await
         .unwrap();
 
-    let access_token = resp_tsm_auth_body.access_token;
-
-    let resp_tsm_region_pricing_data: Vec<TsmPricingDataResponse> = http_client
+    let resp_tsm_region_pricing_data: Vec<TsmPricingDataResponse> = HTTP_CLIENT
         .get("https://pricing-api.tradeskillmaster.com/region/1")
-        .bearer_auth(&access_token)
+        .bearer_auth(&resp_tsm_auth_body.access_token)
         .send()
         .await
         .unwrap()
@@ -56,13 +40,7 @@ struct UsersEndpointJSONBody {
     body: String,
 }
 
-#[derive(Debug, serde::Serialize)]
-struct TsmAuthBody {
-    client_id: String,
-    grant_type: String,
-    scope: String,
-    token: String,
-}
+
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 struct TsmAuthResponse {
